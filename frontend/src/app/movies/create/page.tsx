@@ -7,32 +7,54 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Image from "next/image";
-import IconButton from "@mui/material/IconButton";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { colors } from "@/providers/ThemeProvider";
 import { useRouter } from "next/navigation";
+import { useFormik } from "formik";
+import * as yup from "yup";
+
+const validationSchema = yup.object({
+  title: yup.string().required("Title is required"),
+  year: yup
+    .number()
+    .required("Year is required")
+    .min(1888, "Year must be later than 1888")
+    .max(new Date().getFullYear(), "Year cannot be in the future"),
+  image: yup
+    .mixed()
+    .required("Image is required")
+    .test("fileSize", "File size is too large", (value) => {
+      return value && (value as File).size <= 2 * 1024 * 1024; // 2MB
+    })
+    .test("fileType", "Unsupported file format", (value) => {
+      return value && ["image/jpeg", "image/png", "image/gif"].includes((value as File).type);
+    }),
+});
 
 export default function CreateMovieForm() {
   const router = useRouter();
+  const [image, setImage] = useState<File | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [year, setYear] = useState("");
-  const [image, setImage] = useState(null);
-
-  const handleSubmit = () => {
-    // Handle form submission here (e.g., API call)
-    console.log("Title:", title);
-    console.log("Year:", year);
-    console.log("Image:", image);
-    // Reset form after submission (optional)
-    setTitle("");
-    setYear("");
-    setImage(null);
-  };
+  const formik = useFormik({
+    initialValues: {
+      title: "",
+      year: "",
+      image: null,
+    },
+    validationSchema: validationSchema,
+    onSubmit: (values) => {
+      console.log("Form values:", values);
+      // Handle form submission here (e.g., API call)
+      // Reset form after submission (optional)
+      formik.resetForm();
+      setImage(null);
+    },
+  });
 
   const handleImageChange = (event: any) => {
     const file = event.target.files[0];
     setImage(file);
+    formik.setFieldValue("image", file);
   };
 
   return (
@@ -52,10 +74,13 @@ export default function CreateMovieForm() {
         </Typography>
       </Box>
       <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
         sx={{
           width: "100%",
           display: "flex",
-          padding: 8,
+          paddingX: 16,
+          paddingY: 8,
           flexDirection: { xs: "column", md: "row" },
           gap: 12,
         }}
@@ -97,7 +122,11 @@ export default function CreateMovieForm() {
             id="image-upload"
             onChange={handleImageChange}
           />
+                    {formik.touched.image && formik.errors.image && (
+            <Typography color="error">{formik.errors.image}</Typography>
+          )}
         </Box>
+        
         <Box
           sx={{
             display: "flex",
@@ -110,8 +139,12 @@ export default function CreateMovieForm() {
           <TextField
             variant="outlined"
             placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            name="title"
+            value={formik.values.title}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.title && Boolean(formik.errors.title)}
+            helperText={formik.touched.title && formik.errors.title}
             sx={{
               width: "50%",
             }}
@@ -120,8 +153,12 @@ export default function CreateMovieForm() {
             variant="outlined"
             type="number"
             placeholder="Publishing year"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
+            name="year"
+            value={formik.values.year}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.year && Boolean(formik.errors.year)}
+            helperText={formik.touched.year && formik.errors.year}
             sx={{
               width: "25%",
             }}
@@ -147,7 +184,7 @@ export default function CreateMovieForm() {
             <Button
               variant="contained"
               color="success"
-              onClick={handleSubmit}
+              type="submit"
               sx={{ color: colors.white, fontWeight: "bold", paddingX: 6 }}
             >
               Submit
