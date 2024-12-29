@@ -6,11 +6,12 @@ import "@fontsource/montserrat";
 
 const error = "#EB5757";
 const success = "#2BD17E";
+const highlightedSuccess = "#059669";
 const background = "#093545";
 const input = "#224957";
 const card = "#092C39";
 const fontColor = "#EBEEF5";
-const white = "#FFFFFF"
+const white = "#FFFFFF";
 
 const theme = createTheme({
   palette: {
@@ -54,6 +55,20 @@ const theme = createTheme({
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: '16px',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
   },
 });
 
@@ -75,9 +90,10 @@ export const CustomThemeProvider: React.FC<CustomThemeProviderProps> = ({
 export const colors = {
   error,
   success,
+  highlightedSuccess,
   background,
   input,
   card,
   fontColor,
-  white
+  white,
 };
