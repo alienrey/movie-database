@@ -15,6 +15,7 @@
     "@feathersjs/feathers": "^5.0.31",
     "@feathersjs/socketio-client": "^5.0.31",
     "@fontsource/montserrat": "^5.1.0",
+    "@mui/icons-material": "^6.3.0",
     "@mui/material": "^6.3.0",
     "formik": "^2.4.6",
     "next": "15.1.3",
