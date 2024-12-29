@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import client from "@/utils/FeathersClient";
+import { storage } from "@/utils/CustomStorage";
 
 interface User {
   id: string;
@@ -20,7 +21,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => void;
+  login: (email: string, password: string, rememberMe: boolean) => void;
   logout: () => void;
 }
 
@@ -33,14 +34,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const [user, setUser] = useState<User | null>(null);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe: boolean) => {
     const result = await Authentication.login(email, password);
     setUser(result.user);
+    storage.setItem("feathers-jwt", result.accessToken, rememberMe);
   };
 
   const logout = async () => {
     await Authentication.logout();
     setUser(null);
+    storage.removeItem("feathers-jwt");
     router.push("/");
   };
 
@@ -50,7 +53,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     const reauthenticate = async () => {
-      const token = window.localStorage.getItem("feathers-jwt");
+      const token =
+        storage.getItem("feathers-jwt")
+  
       if (!client.authentication.authenticated) {
         if (!token) {
           router.push("/auth/signin");
@@ -68,8 +73,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     };
     reauthenticate();
   }, [router, Authentication.isAuthenticated()]);
-
-  console.log(Authentication.isAuthenticated());
 
   return (
     <AuthContext.Provider

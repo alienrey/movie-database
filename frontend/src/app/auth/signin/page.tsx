@@ -42,10 +42,9 @@ export default function SignInPage() {
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      console.log(values);
       try {
         setIsButtonLoading(true);
-        await login(values.email, values.password);
+        await login(values.email, values.password, values.rememberMe);
       } catch (error) {
         console.log(error);
       } finally {
