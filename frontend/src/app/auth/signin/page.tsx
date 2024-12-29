@@ -1,16 +1,39 @@
-'use client';
-import React from "react";
-import { Box, Button, Checkbox, TextField, Typography, FormControlLabel } from "@mui/material";
+"use client";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Checkbox,
+  TextField,
+  Typography,
+  FormControlLabel,
+  CircularProgress,
+} from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { colors } from "@/providers/ThemeProvider";
+import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "next/navigation";
 
 const validationSchema = Yup.object({
-  email: Yup.string().email("Invalid email address").required("Email is required"),
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
   password: Yup.string().required("Password is required"),
 });
 
 export default function SignInPage() {
+  const router = useRouter();
+
+  const { login, isAuthenticated } = useAuth();
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
+
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -18,8 +41,16 @@ export default function SignInPage() {
       rememberMe: false,
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       console.log(values);
+      try {
+        setIsButtonLoading(true);
+        await login(values.email, values.password);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsButtonLoading(false);
+      }
     },
   });
 
@@ -39,22 +70,23 @@ export default function SignInPage() {
           textAlign: "center",
         }}
       >
-        <Typography
-          variant="h2"
-          sx={{ marginBottom: "24px", fontWeight: 600 }}
-        >
+        <Typography variant="h2" sx={{ marginBottom: "24px", fontWeight: 600 }}>
           Sign in
         </Typography>
         <form onSubmit={formik.handleSubmit}>
           <TextField
+          slotProps={{
+
+          }}
             fullWidth
             variant="outlined"
             type="email"
             placeholder="Email"
-            {...formik.getFieldProps('email')}
+            {...formik.getFieldProps("email")}
             error={formik.touched.email && Boolean(formik.errors.email)}
             helperText={formik.touched.email && formik.errors.email}
             sx={{
+              borderRadius: "20rem",
               marginBottom: "16px",
               input: { color: "white" },
             }}
@@ -64,7 +96,7 @@ export default function SignInPage() {
             variant="outlined"
             type="password"
             placeholder="Password"
-            {...formik.getFieldProps('password')}
+            {...formik.getFieldProps("password")}
             error={formik.touched.password && Boolean(formik.errors.password)}
             helperText={formik.touched.password && formik.errors.password}
             sx={{
@@ -75,7 +107,7 @@ export default function SignInPage() {
           <FormControlLabel
             control={
               <Checkbox
-                {...formik.getFieldProps('rememberMe')}
+                {...formik.getFieldProps("rememberMe")}
                 checked={formik.values.rememberMe}
                 sx={{ color: colors.input, fill: colors.input }}
               />
@@ -90,12 +122,27 @@ export default function SignInPage() {
           <Button
             fullWidth
             type="submit"
-            sx={{ borderRadius: "12px", height: "56px", backgroundColor: "#2BD17E" }}
+            sx={{
+              borderRadius: "12px",
+              height: "56px",
+              backgroundColor: colors.success,
+            }}
             variant="contained"
+            disabled={isButtonLoading}
           >
-            <Typography sx={{ color: `${colors.white}`, fontSize: "16px", fontWeight: 800 }}>
-              Login
-            </Typography>
+            {isButtonLoading ? (
+              <CircularProgress size={24} sx={{ color: colors.white }} />
+            ) : (
+              <Typography
+                sx={{
+                  color: `${colors.white}`,
+                  fontSize: "16px",
+                  fontWeight: 800,
+                }}
+              >
+                Login
+              </Typography>
+            )}
           </Button>
         </form>
       </Box>
