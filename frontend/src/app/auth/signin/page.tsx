@@ -77,6 +77,7 @@ export default function SignInPage() {
               <Checkbox
                 {...formik.getFieldProps('rememberMe')}
                 checked={formik.values.rememberMe}
+                sx={{ color: colors.input, fill: colors.input }}
               />
             }
             label={
