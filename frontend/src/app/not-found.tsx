@@ -15,7 +15,7 @@ export default function NotFound() {
   return (
     <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100vh">
       <CircularProgress />
-      <Box mt={2}>Redirecting to home page...</Box>
+      <Box mt={2}>Page not found. Redirecting...</Box>
     </Box>
   );
 }
