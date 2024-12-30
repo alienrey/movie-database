@@ -12,6 +12,7 @@ import { colors } from "@/providers/ThemeProvider";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import client from "@/utils/FeathersClient";
 
 const validationSchema = yup.object({
   title: yup.string().required("Title is required"),
@@ -39,15 +40,27 @@ export default function CreateMovieForm() {
     initialValues: {
       title: "",
       year: "",
-      image: null,
+      image: null as File | null,
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      console.log("Form values:", values);
-      // Handle form submission here (e.g., API call)
-      // Reset form after submission (optional)
-      formik.resetForm();
-      setImage(null);
+    onSubmit: async (values) => {
+      try {
+        console.log("Form values:", values);
+        console.log("Image:", values.image);
+        const fileMetaData = values.image ? {
+          name: values.image.name,
+          type: values.image.type,
+          size: values.image.size,
+        } : null;
+        // Handle form submission here (e.g., API call)
+        // Reset form after submission (optional)
+        const result = await client.service("movies").create({...values, fileMetaData});
+        console.log("Result:", result);
+        formik.resetForm();
+        setImage(null);
+      } catch (error) {
+        console.log(error)
+      }
     },
   });
 

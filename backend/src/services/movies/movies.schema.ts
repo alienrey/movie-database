@@ -12,12 +12,12 @@ export const moviesSchema = Type.Object(
   {
     id: Type.String(),
     title: Type.String(),
-    year: Type.String(),
-    poster: Type.String(),
+    year: Type.Number(),
+    poster: Type.Optional(Type.String()),
     created_at: Type.String({ format: 'date-time' }),
     updated_at: Type.String({ format: 'date-time' })
   },
-  { $id: 'Movies', additionalProperties: false }
+  { $id: 'Movies', additionalProperties: true }
 )
 export type Movies = Static<typeof moviesSchema>
 export const moviesValidator = getValidator(moviesSchema, dataValidator)
@@ -29,9 +29,9 @@ export const moviesExternalResolver = resolve<Movies, HookContext<MoviesService>
 export const moviesDataSchema = Type.Pick(moviesSchema, [
   'title',
   'year',
-  'poster'
+  "poster"
 ], {
-  $id: 'MoviesData'
+  $id: 'MoviesData', additionalProperties: true
 })
 export type MoviesData = Static<typeof moviesDataSchema>
 export const moviesDataValidator = getValidator(moviesDataSchema, dataValidator)

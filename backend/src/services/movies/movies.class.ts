@@ -5,6 +5,10 @@ import type { KnexAdapterParams, KnexAdapterOptions } from '@feathersjs/knex'
 
 import type { Application } from '../../declarations'
 import type { Movies, MoviesData, MoviesPatch, MoviesQuery } from './movies.schema'
+import dotenv from 'dotenv'
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { s3, bucketName } from './utils/s3'
+dotenv.config()
 
 export type { Movies, MoviesData, MoviesPatch, MoviesQuery }
 
@@ -16,7 +20,27 @@ export class MoviesService<ServiceParams extends Params = MoviesParams> extends 
   MoviesData,
   MoviesParams,
   MoviesPatch
-> {}
+> {
+  async create(data: any, params?: ServiceParams): Promise<any> {
+    const uploadParams = {
+      Bucket: bucketName as string,
+      Key: data.fileMetaData.name,
+      Body: data.image,
+      contentType: data.fileMetaData.type
+    }
+    const command = new PutObjectCommand(uploadParams)
+    const uploadResult = await s3.send(command)
+
+    return super.create(
+      {
+        title: data.title,
+        year: data.year,
+        poster: uploadParams.Key
+      },
+      params
+    )
+  }
+}
 
 export const getOptions = (app: Application): KnexAdapterOptions => {
   return {
