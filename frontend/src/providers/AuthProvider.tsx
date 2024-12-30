@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import client from "@/utils/FeathersClient";
+import { dynamicStorage } from "@/utils/DynamicStorage";
 
 interface User {
   id: string;
@@ -39,7 +40,9 @@ const login = async (
 ) => {
 
   if(rememberMe) {
-    localStorage.setItem("remember-me", "true");
+    dynamicStorage.setRememberMe(true);
+  } else {
+    dynamicStorage.setRememberMe(false);
   }
 
   const result = await Authentication.login(email, password);
@@ -51,8 +54,7 @@ const login = async (
   const logout = async () => {
     await Authentication.logout();
     setUser(null);
-    localStorage.clear();
-    sessionStorage.clear();
+    dynamicStorage.clearAll();
     router.push("/");
   };
 
@@ -62,7 +64,8 @@ const login = async (
 
   useEffect(() => {
     const reauthenticate = async () => {
-      const token = localStorage.getItem("feathers-jwt");
+      const token = dynamicStorage.getItem("feathers-jwt");
+      console.log(token);
 
       if (!token) {
         router.push("/auth/signin");
@@ -78,14 +81,6 @@ const login = async (
     };
     reauthenticate();
   }, [router]);
-
-  window.onbeforeunload = () => {
-    console.log("localStorage.getItem('remember-me')", localStorage.getItem("remember-me"));
-    if(!localStorage.getItem("remember-me")){
-      localStorage.clear();
-      sessionStorage.clear();
-    }
-  };
 
   return (
     <AuthContext.Provider

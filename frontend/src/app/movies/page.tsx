@@ -11,9 +11,6 @@ export default function MoviesPage() {
   const { logout } = useAuth();
   const { fetchMovies } = useMovies();
   const router = useRouter();
-  const handleLogout = () => {
-    logout();
-  };
 
   useEffect(() => {
     const fetchMoviesData = async () => {
@@ -23,11 +20,8 @@ export default function MoviesPage() {
     fetchMoviesData();
   }, []);
 
-
-
   const handleAddMovie = () => {
     router.push("/movies/create");
-    console.log("Add a new movie clicked");
   };
 
   return (
@@ -45,7 +39,7 @@ export default function MoviesPage() {
       }}
     >
       <Button
-        onClick={handleLogout}
+        onClick={logout}
         endIcon={<LogoutIcon />}
         sx={{
           position: "absolute",

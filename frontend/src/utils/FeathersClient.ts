@@ -2,6 +2,7 @@ import io from "socket.io-client";
 import { feathers } from "@feathersjs/feathers";
 import socketio from "@feathersjs/socketio-client";
 import authentication from "@feathersjs/authentication-client";
+import { dynamicStorage } from "./DynamicStorage";
 
 const client = feathers();
 
@@ -14,18 +15,20 @@ const socket = io(uri, {
 
 client.configure(socketio(socket));
 
-client.configure(
-  authentication({
-    storage: window.localStorage,
-    jwtStrategy: "jwt",
-  })
-);
+if (typeof window !== 'undefined') {
+  client.configure(
+    authentication({
+      storage: dynamicStorage,
+      jwtStrategy: "jwt",
+    })
+  );
 
-const token = window.localStorage.getItem("feathers-jwt");
+  const token = dynamicStorage.getItem("feathers-jwt");
 
-if (token) {
-  client.authentication.setAccessToken(token);
-  client.reAuthenticate();
+  if (token) {
+    client.authentication.setAccessToken(token);
+    client.reAuthenticate();
+  }
 }
 
 export default client;
