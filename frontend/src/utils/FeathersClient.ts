@@ -2,7 +2,6 @@ import io from "socket.io-client";
 import { feathers } from "@feathersjs/feathers";
 import socketio from "@feathersjs/socketio-client";
 import authentication from "@feathersjs/authentication-client";
-import { storage } from "./CustomStorage";
 
 const client = feathers();
 
@@ -17,9 +16,16 @@ client.configure(socketio(socket));
 
 client.configure(
   authentication({
-    storage: storage as Storage,
+    storage: window.localStorage,
     jwtStrategy: "jwt",
   })
 );
+
+const token = window.localStorage.getItem("feathers-jwt");
+
+if (token) {
+  client.authentication.setAccessToken(token);
+  client.reAuthenticate();
+}
 
 export default client;

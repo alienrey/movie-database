@@ -10,8 +10,6 @@ export class Authentication {
       password,
     });
 
-    console.log(response)
-
     return response;
   }
 

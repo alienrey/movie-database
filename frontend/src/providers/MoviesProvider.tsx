@@ -1,4 +1,5 @@
 'use client';
+import client from "@/utils/FeathersClient";
 import React, { createContext, useState, useContext, ReactNode } from "react";
 
 interface Movie {
@@ -10,6 +11,7 @@ interface Movie {
 
 interface MoviesContextProps {
   movies: Movie[];
+  fetchMovies: () => void;
   addMovie: (movie: Movie) => void;
   removeMovie: (id: string) => void;
   editMovie: (id: string, updatedMovie: Partial<Movie>) => void;
@@ -21,6 +23,11 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [movies, setMovies] = useState<Movie[]>([]);
+
+  const fetchMovies = async () => {
+    const response = await client.service("movies").find();
+    console.log(response);
+  }
 
   const addMovie = (movie: Movie) => {
     setMovies((prevMovies) => [...prevMovies, movie]);
@@ -40,7 +47,7 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <MoviesContext.Provider
-      value={{ movies, addMovie, removeMovie, editMovie }}
+      value={{ movies, addMovie, removeMovie, editMovie, fetchMovies }}
     >
       {children}
     </MoviesContext.Provider>
