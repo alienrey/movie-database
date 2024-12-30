@@ -4,16 +4,26 @@ import { Box, Button, Typography } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { colors } from "@/providers/ThemeProvider";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useMovies } from "@/providers/MoviesProvider";
 
 export default function MoviesPage() {
-  const { logout, isAuthenticated } = useAuth();
+  const { logout } = useAuth();
+  const { fetchMovies } = useMovies();
   const router = useRouter();
   const handleLogout = () => {
-    console.log("Logout clicked");
     logout();
   };
 
-  console.log(isAuthenticated);
+  useEffect(() => {
+    const fetchMoviesData = async () => {
+      await fetchMovies();
+    };
+
+    fetchMoviesData();
+  }, []);
+
+
 
   const handleAddMovie = () => {
     router.push("/movies/create");
