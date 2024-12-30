@@ -10,8 +10,12 @@ import type { MoviesService } from './movies.class'
 // Main data model schema
 export const moviesSchema = Type.Object(
   {
-    id: Type.Number(),
-    text: Type.String()
+    id: Type.String(),
+    title: Type.String(),
+    year: Type.String(),
+    poster: Type.String(),
+    created_at: Type.String({ format: 'date-time' }),
+    updated_at: Type.String({ format: 'date-time' })
   },
   { $id: 'Movies', additionalProperties: false }
 )
@@ -22,7 +26,11 @@ export const moviesResolver = resolve<Movies, HookContext<MoviesService>>({})
 export const moviesExternalResolver = resolve<Movies, HookContext<MoviesService>>({})
 
 // Schema for creating new entries
-export const moviesDataSchema = Type.Pick(moviesSchema, ['text'], {
+export const moviesDataSchema = Type.Pick(moviesSchema, [
+  'title',
+  'year',
+  'poster'
+], {
   $id: 'MoviesData'
 })
 export type MoviesData = Static<typeof moviesDataSchema>
@@ -38,7 +46,14 @@ export const moviesPatchValidator = getValidator(moviesPatchSchema, dataValidato
 export const moviesPatchResolver = resolve<Movies, HookContext<MoviesService>>({})
 
 // Schema for allowed query properties
-export const moviesQueryProperties = Type.Pick(moviesSchema, ['id', 'text'])
+export const moviesQueryProperties = Type.Pick(moviesSchema, [
+  'id',
+  'title',
+  'year',
+  'poster',
+  'created_at',
+  'updated_at'
+])
 export const moviesQuerySchema = Type.Intersect(
   [
     querySyntax(moviesQueryProperties),
