@@ -353,9 +353,9 @@
     lodash "^4.17.21"
 
 "@fontsource/montserrat@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@fontsource/montserrat/-/montserrat-5.1.0.tgz#3a73a60be1ecd247ff879287f63acda43962cece"
-  integrity sha512-HB4+rWP9Y8g6T9RGRVJk2SvAJtx2eBAXuivvPOqQdD806/9WESUfucfH9LqFj3bGgdhNCfh0Rv0NGuwEmBLRiw==
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@fontsource/montserrat/-/montserrat-5.1.1.tgz#25f420893ae1726b375ac921542138c16557966d"
+  integrity sha512-myTQCo0XWf5AXc3Pm5GFFTstueYTacE+gpL3G8Vf5ELpr/rBfW+zr7dKLPYXlq2r21HHwfyw6yueKWccWUtKBA==
 
 "@humanfs/core@^0.19.1":
   version "0.19.1"
@@ -2553,9 +2553,9 @@ optionator@^0.9.3:
     word-wrap "^1.2.5"
 
 own-keys@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/own-keys/-/own-keys-1.0.0.tgz#4ab4f9758185bd8f2716f95453ea7da72fb56c09"
-  integrity sha512-HcuIjzpjrUbqZPGzWHVg95Bc2Y37KoY5n66QQyEGMzrIWVKHsgHcv8/Aq5Cu3qFUQJzMSPVP8MD3oaFoaME1lg==
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/own-keys/-/own-keys-1.0.1.tgz#e4006910a2bf913585289676eebd6f390cf51358"
+  integrity sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==
   dependencies:
     get-intrinsic "^1.2.6"
     object-keys "^1.1.1"

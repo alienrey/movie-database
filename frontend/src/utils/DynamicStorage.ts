@@ -6,7 +6,7 @@ class DynamicStorage {
   }
 
   private checkRememberMe() {
-    const rememberMe = localStorage.getItem("rememberMe");
+    const rememberMe = typeof localStorage !== 'undefined' ? localStorage.getItem("rememberMe") : null;
     if (rememberMe === "true") {
       this.useLocalStorage();
     } else {
@@ -47,11 +47,11 @@ class DynamicStorage {
   }
 
   useLocalStorage() {
-    this.storage = localStorage;
+    this.storage = typeof localStorage !== 'undefined' ? localStorage : null;
   }
 
   useSessionStorage() {
-    this.storage = sessionStorage;
+    this.storage = typeof sessionStorage !== 'undefined' ? sessionStorage : null;
   }
 }
 
