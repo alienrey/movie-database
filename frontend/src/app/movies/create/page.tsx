@@ -168,7 +168,7 @@ export default function CreateMovieForm() {
                 onBlur={formik.handleBlur}
                 error={formik.touched.year && Boolean(formik.errors.year)}
                 helperText={formik.touched.year && formik.errors.year}
-                sx={{ width: { xs: "100%", md: "60%" } }}
+                sx={{ width: { xs: "100%", md: "65%" } }}
               />
               <Box
                 sx={{
