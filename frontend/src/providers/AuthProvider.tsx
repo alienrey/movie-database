@@ -10,7 +10,6 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import client from "@/utils/FeathersClient";
-import { storage } from "@/utils/CustomStorage";
 
 interface User {
   id: string;
@@ -31,19 +30,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const router = useRouter();
-
   const [user, setUser] = useState<User | null>(null);
 
-  const login = async (email: string, password: string, rememberMe: boolean) => {
-    const result = await Authentication.login(email, password);
-    setUser(result.user);
-    storage.setItem("feathers-jwt", result.accessToken, rememberMe);
-  };
+const login = async (
+  email: string,
+  password: string,
+  rememberMe: boolean
+) => {
+
+  if(rememberMe) {
+    localStorage.setItem("remember-me", "true");
+  }
+
+  const result = await Authentication.login(email, password);
+  setUser(result.user);
+
+  router.push("/");
+};
 
   const logout = async () => {
     await Authentication.logout();
     setUser(null);
-    storage.removeItem("feathers-jwt");
+    localStorage.clear();
+    sessionStorage.clear();
     router.push("/");
   };
 
@@ -53,26 +62,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     const reauthenticate = async () => {
-      const token =
-        storage.getItem("feathers-jwt")
-  
-      if (!client.authentication.authenticated) {
-        if (!token) {
+      const token = localStorage.getItem("feathers-jwt");
+
+      if (!token) {
+        router.push("/auth/signin");
+      } else {
+        try {
+          const { user } = await client.reAuthenticate();
+          setUser(user);
+        } catch (error) {
+          console.error("Reauthentication failed:", error);
           router.push("/auth/signin");
-        } else {
-          try {
-            await client.authentication.setAccessToken(token);
-            const { user } = await client.reAuthenticate();
-            setUser(user);
-          } catch (error) {
-            console.error("Reauthentication failed:", error);
-            router.push("/auth/signin");
-          }
         }
       }
     };
     reauthenticate();
-  }, [router, Authentication.isAuthenticated()]);
+  }, [router]);
+
+  window.onbeforeunload = () => {
+    console.log("localStorage.getItem('remember-me')", localStorage.getItem("remember-me"));
+    if(!localStorage.getItem("remember-me")){
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+  };
 
   return (
     <AuthContext.Provider
