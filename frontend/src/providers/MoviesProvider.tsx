@@ -35,15 +35,17 @@ interface MoviesContextProps {
 
 const MoviesContext = createContext<MoviesContextProps | undefined>(undefined);
 
+const defaultLimit = 8;
+
 export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(defaultLimit);
   const [total, setTotal] = useState(0);
 
-  const fetchMovies = async (page = 1, limit = 5) => {
+  const fetchMovies = async (page = 1) => {
     const response = await client.service('movies').find({
       query: {
         $limit: limit,
@@ -53,7 +55,6 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
     setMovies(response.data as Movie[]);
     setTotal(response.total);
     setPage(page);
-    setLimit(limit);
     console.log(response);
   };
 

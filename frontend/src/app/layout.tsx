@@ -42,7 +42,7 @@ export default function RootLayout({
           viewBox="0 0 1400 90"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          sx={{ position: 'absolute', bottom: 0 }}
+          sx={{ position: 'absolute', bottom: 0, zIndex: -1 }}
         >
           <path
             fillRule="evenodd"

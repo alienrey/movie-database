@@ -1,21 +1,34 @@
 "use client";
 import { useAuth } from "@/providers/AuthProvider";
-import { Box, Button, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+} from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { colors } from "@/providers/ThemeProvider";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMovies } from "@/providers/MoviesProvider";
-import Image from "next/image";
-
+import Grid from "@mui/material/Grid2";
 export default function MoviesPage() {
   const { logout } = useAuth();
   const { fetchMovies, movies, page, setPage, limit, total } = useMovies();
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    fetchMovies(page, limit);
-  }, [page, limit]);
+    const handleFetchMovies = async () => {
+      setIsLoading(true);
+      await fetchMovies(page);
+      setIsLoading(false);
+    };
+
+    handleFetchMovies();
+  }, [page]);
 
   const handleNextPage = () => {
     if (page * limit < total) {
@@ -29,18 +42,25 @@ export default function MoviesPage() {
     }
   };
 
+  const handlePageClick = (pageNumber: number) => {
+    setPage(pageNumber);
+  };
+
   useEffect(() => {
     const fetchMoviesData = async () => {
       await fetchMovies();
     };
 
     fetchMoviesData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddMovie = () => {
     router.push("/movies/create");
   };
+
+  const totalPages = Math.ceil(total / limit);
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <Box
@@ -52,31 +72,72 @@ export default function MoviesPage() {
         alignItems: "center",
         color: "#fff",
         position: "relative",
-        padding: 3,
+        padding: 2,
       }}
     >
-      {movies.map((movie) => (
-        <Box
-          key={movie.id}
-          sx={{ display: "flex", alignItems: "center", mb: 2 }}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mb: 2,
+          padding: { xs: 2, md: 2 },
+          width: "70%",
+        }}
+      >
+        <Grid
+          container
+          spacing={{ xs: 2, md: 8 }}
+          columns={{ xs: 4, sm: 8, md: 12 }}
         >
-          <Box sx={{ width: "100px", height: "150px", mr: 2 }}>
-            <Image
-              src={movie.poster}
-              alt={movie.title}
-              width="100"
-              height="100"
-              style={{ objectFit: "cover" }}
-            />
-          </Box>
-          <Box>
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              {movie.title}
-            </Typography>
-            <Typography variant="body1">{movie.year}</Typography>
-          </Box>
-        </Box>
-      ))}
+          {movies.map((movie, index) => (
+            <Grid size={3} key={index}>
+              <Box>
+                <Card
+                  sx={{
+                    backgroundColor: "#18344a",
+                    color: "white",
+                    height: "100%",
+                    width: "100%",
+                  }}
+                >
+                  <CardMedia
+                    sx={{
+                      height: { xs: 80, md: 120 },
+                      width: { xs: 60, md: 100 },
+                      objectFit: "cover",
+                    }}
+                    component="img"
+                    image={movie.poster}
+                    alt={movie.title}
+                  />
+                  <CardContent>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {movie.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {movie.year}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
 
       <Button
         onClick={logout}
@@ -96,31 +157,51 @@ export default function MoviesPage() {
         Logout
       </Button>
 
-      <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
-        Your movie list is empty
-      </Typography>
-      <Button
-        onClick={handleAddMovie}
-        variant="contained"
-        sx={{
-          borderRadius: "0.5rem",
-          backgroundColor: colors.success,
-          color: colors.white,
-          fontWeight: "bold",
-          "&:hover": {
-            backgroundColor: colors.highlightedSuccess,
-          },
-        }}
-      >
-        Add a new movie
-      </Button>
-
-      <button onClick={handlePreviousPage} disabled={page === 1}>
-        Previous
-      </button>
-      <button onClick={handleNextPage} disabled={page * limit >= total}>
-        Next
-      </button>
+      {isLoading ? (
+        <></>
+      ) : (
+        movies.length === 0 && (
+          <>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
+              Your movie list is empty
+            </Typography>
+            <Button
+              onClick={handleAddMovie}
+              variant="contained"
+              sx={{
+                borderRadius: "0.5rem",
+                backgroundColor: colors.success,
+                color: colors.white,
+                fontWeight: "bold",
+                "&:hover": {
+                  backgroundColor: colors.highlightedSuccess,
+                },
+              }}
+            >
+              Add a new movie
+            </Button>
+          </>
+        )
+      )}
+      {movies.length > 0 && (
+        <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+          <Button onClick={handlePreviousPage} disabled={page === 1}>
+            Previous
+          </Button>
+          {pageNumbers.map((pageNumber) => (
+            <Button
+              key={pageNumber}
+              onClick={() => handlePageClick(pageNumber)}
+              variant={page === pageNumber ? "contained" : "outlined"}
+            >
+              {pageNumber}
+            </Button>
+          ))}
+          <Button onClick={handleNextPage} disabled={page * limit >= total}>
+            Next
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }
