@@ -1,10 +1,29 @@
 {
+  "host": "HOSTNAME",
   "port": {
     "__name": "PORT",
     "__format": "number"
   },
-  "host": "HOSTNAME",
+  "public": "PUBLIC",
+  "postgresql": {
+    "client": "POSTGRESQL_CLIENT",
+    "connection": "DB_CONNECTION_STRING"
+  },
   "authentication": {
-    "secret": "FEATHERS_SECRET"
+    "entity": "AUTH_ENTITY",
+    "service": "AUTH_SERVICE",
+    "secret": "FEATHERS_SECRET",
+    "jwtOptions": {
+      "header": {
+        "typ": "JWT_HEADER_TYP"
+      },
+      "audience": "JWT_AUDIENCE",
+      "algorithm": "JWT_ALGORITHM",
+      "expiresIn": "JWT_EXPIRES_IN"
+    },
+    "local": {
+      "usernameField": "LOCAL_USERNAME_FIELD",
+      "passwordField": "LOCAL_PASSWORD_FIELD"
+    }
   }
 }

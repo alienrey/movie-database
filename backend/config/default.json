@@ -1,37 +1,10 @@
 {
-  "host": "localhost",
-  "port": 3030,
-  "public": "./public/",
-  "origins": [
-    "http://localhost:3030"
-  ],
-  "paginate": {
-    "default": 10,
-    "max": 50
-  },
-  "postgresql": {
-    "client": "pg",
-    "connection": "postgres://postgres:@localhost:5432/movie-db"
-  },
-  "authentication": {
-    "entity": "user",
-    "service": "users",
-    "secret": "Y5tIFzLH4BYinkW5Qkz3FwprN/JyE0jh",
-    "authStrategies": [
-      "jwt",
-      "local"
-    ],
-    "jwtOptions": {
-      "header": {
-        "typ": "access"
-      },
-      "audience": "https://yourdomain.com",
-      "algorithm": "HS256",
-      "expiresIn": "1d"
+    "origins": ["http://localhost:3030"],
+    "authentication": {
+        "authStrategies": ["jwt", "local"]
     },
-    "local": {
-      "usernameField": "email",
-      "passwordField": "password"
+    "paginate": {
+        "default": 10,
+        "max": 50
     }
-  }
 }
