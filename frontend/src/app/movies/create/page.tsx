@@ -13,7 +13,8 @@ import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { useMovies } from "@/providers/MoviesProvider";
-import { Grid2 } from "@mui/material";
+import { CircularProgress, Grid2 } from "@mui/material";
+import showToast from "@/utils/Toasts";
 
 const validationSchema = yup.object({
   title: yup.string().required("Title is required"),
@@ -27,6 +28,7 @@ const validationSchema = yup.object({
 export default function CreateMovieForm() {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { addMovie } = useMovies();
 
   const formik = useFormik({
@@ -37,7 +39,9 @@ export default function CreateMovieForm() {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
+        setIsLoading(true);
         if (!selectedFile) {
+          showToast.info("Please select an image");
           return;
         }
         const fileMetaData = {
@@ -51,10 +55,15 @@ export default function CreateMovieForm() {
           file: selectedFile,
           fileMetaData,
         });
-        formik.resetForm();
+        showToast.success("Movie added successfully");
         setSelectedFile(null);
+        formik.resetForm();
+        router.back();
       } catch (error) {
         console.log(error);
+        showToast.error("Failed to add movie");
+      } finally {
+        setIsLoading(false);
       }
     },
   });
@@ -62,7 +71,6 @@ export default function CreateMovieForm() {
   const handleImageChange = (event: any) => {
     const file = event.target.files[0];
     setSelectedFile(file);
-    formik.setFieldValue("image", file);
   };
 
   return (
@@ -193,8 +201,9 @@ export default function CreateMovieForm() {
                   color="success"
                   type="submit"
                   sx={{ color: colors.white, fontWeight: "bold", paddingX: 6 }}
+                  disabled={isLoading}
                 >
-                  Submit
+                  {isLoading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
                 </Button>
               </Box>
             </Box>

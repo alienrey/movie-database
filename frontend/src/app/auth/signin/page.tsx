@@ -14,6 +14,7 @@ import * as Yup from "yup";
 import { colors } from "@/providers/ThemeProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { useRouter } from "next/navigation";
+import showToast from "@/utils/Toasts";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -29,6 +30,7 @@ export default function SignInPage() {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
 
   useEffect(() => {
+    console.log(isAuthenticated);
     if (isAuthenticated) {
       router.push("/");
     }
@@ -45,8 +47,10 @@ export default function SignInPage() {
       try {
         setIsButtonLoading(true);
         await login(values.email, values.password, values.rememberMe);
+        showToast.success("Login successful");
       } catch (error) {
         console.log(error);
+        showToast.error("Email or password is incorrect.");
       } finally {
         setIsButtonLoading(false);
       }
@@ -74,9 +78,7 @@ export default function SignInPage() {
         </Typography>
         <form onSubmit={formik.handleSubmit}>
           <TextField
-          slotProps={{
-
-          }}
+            slotProps={{}}
             fullWidth
             variant="outlined"
             type="email"

@@ -22,10 +22,15 @@ interface AddMovieProps {
 
 interface MoviesContextProps {
   movies: Movie[];
-  fetchMovies: () => void;
+  page: number;
+  limit: number;
+  total: number;
+  fetchMovies: (page?: number, limit?: number) => void;
   addMovie: (movieParams: AddMovieProps) => void;
   removeMovie: (id: string) => void;
   editMovie: (id: string, updatedMovie: Partial<Movie>) => void;
+  setPage: (page: number) => void;
+  setLimit: (limit: number) => void;
 }
 
 const MoviesContext = createContext<MoviesContextProps | undefined>(undefined);
@@ -34,10 +39,22 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [total, setTotal] = useState(0);
 
-  const fetchMovies = async () => {
-    const response = await client.service("movies").find();
+  const fetchMovies = async (page = 1, limit = 5) => {
+    const response = await client.service('movies').find({
+      query: {
+        $limit: limit,
+        $skip: (page - 1) * limit,
+      },
+    });
     setMovies(response.data as Movie[]);
+    setTotal(response.total);
+    setPage(page);
+    setLimit(limit);
+    console.log(response);
   };
 
   const addMovie = async (addMovieParams: AddMovieProps) => {
@@ -60,7 +77,18 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <MoviesContext.Provider
-      value={{ movies, addMovie, removeMovie, editMovie, fetchMovies }}
+      value={{
+        movies,
+        page,
+        limit,
+        total,
+        fetchMovies,
+        addMovie,
+        removeMovie,
+        setPage,
+        setLimit,
+        editMovie,
+      }}
     >
       {children}
     </MoviesContext.Provider>

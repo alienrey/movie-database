@@ -3,6 +3,7 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import { MoviesProvider } from "@/providers/MoviesProvider";
 import { CustomThemeProvider } from "@/providers/ThemeProvider";
 import { Box } from "@mui/material";
+import { Bounce, ToastContainer } from "react-toastify";
 
 export const metadata: Metadata = {
   title: "Movie Database",
@@ -17,6 +18,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+      <ToastContainer
+        position="top-center"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Bounce}
+      />
         <CustomThemeProvider>
           <AuthProvider>
             <MoviesProvider>{children}</MoviesProvider>

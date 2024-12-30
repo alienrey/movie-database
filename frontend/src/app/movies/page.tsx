@@ -10,8 +10,24 @@ import Image from "next/image";
 
 export default function MoviesPage() {
   const { logout } = useAuth();
-  const { fetchMovies, movies } = useMovies();
+  const { fetchMovies, movies, page, setPage, limit, total } = useMovies();
   const router = useRouter();
+
+  useEffect(() => {
+    fetchMovies(page, limit);
+  }, [page, limit]);
+
+  const handleNextPage = () => {
+    if (page * limit < total) {
+      setPage(page + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
 
   useEffect(() => {
     const fetchMoviesData = async () => {
@@ -19,13 +35,12 @@ export default function MoviesPage() {
     };
 
     fetchMoviesData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddMovie = () => {
     router.push("/movies/create");
   };
-
-  console.log(movies);
 
   return (
     <Box
@@ -99,6 +114,13 @@ export default function MoviesPage() {
       >
         Add a new movie
       </Button>
+
+      <button onClick={handlePreviousPage} disabled={page === 1}>
+        Previous
+      </button>
+      <button onClick={handleNextPage} disabled={page * limit >= total}>
+        Next
+      </button>
     </Box>
   );
 }
