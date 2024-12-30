@@ -2,13 +2,15 @@
 import type { Params } from '@feathersjs/feathers'
 import { KnexService } from '@feathersjs/knex'
 import type { KnexAdapterParams, KnexAdapterOptions } from '@feathersjs/knex'
-
+import crypto from 'crypto'
 import type { Application } from '../../declarations'
 import type { Movies, MoviesData, MoviesPatch, MoviesQuery } from './movies.schema'
 import dotenv from 'dotenv'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { s3, bucketName } from './utils/s3'
+import { s3, bucketName, bucketEndpoint } from './utils/s3'
 dotenv.config()
+
+
 
 export type { Movies, MoviesData, MoviesPatch, MoviesQuery }
 
@@ -24,18 +26,18 @@ export class MoviesService<ServiceParams extends Params = MoviesParams> extends 
   async create(data: any, params?: ServiceParams): Promise<any> {
     const uploadParams = {
       Bucket: bucketName as string,
-      Key: data.fileMetaData.name,
+      Key: `${crypto.randomBytes(32).toString('hex')}.${data.fileMetaData.name.split('.').pop()}`,
       Body: data.image,
       contentType: data.fileMetaData.type
     }
     const command = new PutObjectCommand(uploadParams)
-    const uploadResult = await s3.send(command)
+    await s3.send(command)
 
     return super.create(
       {
         title: data.title,
         year: data.year,
-        poster: uploadParams.Key
+        poster: `${bucketEndpoint}/${uploadParams.Key}`,
       },
       params
     )
