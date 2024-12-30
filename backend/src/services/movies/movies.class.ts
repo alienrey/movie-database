@@ -27,7 +27,7 @@ export class MoviesService<ServiceParams extends Params = MoviesParams> extends 
     const uploadParams = {
       Bucket: bucketName as string,
       Key: `${crypto.randomBytes(32).toString('hex')}.${data.fileMetaData.name.split('.').pop()}`,
-      Body: data.image,
+      Body: data.file,
       contentType: data.fileMetaData.type
     }
     const command = new PutObjectCommand(uploadParams)
