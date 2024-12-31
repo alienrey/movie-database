@@ -13,7 +13,8 @@ import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { useMovies } from "@/providers/MoviesProvider";
-import { CircularProgress, Grid2 } from "@mui/material";
+import { CircularProgress } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import showToast from "@/utils/Toasts";
 
 const validationSchema = yup.object({
@@ -29,6 +30,8 @@ export default function CreateMovieForm() {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  // TODO: Implement movie suggestion
+  // const [movieSuggestion, setMovieSuggestion] = useState<any>(null);
   const { addMovie } = useMovies();
 
   const formik = useFormik({
@@ -68,6 +71,28 @@ export default function CreateMovieForm() {
     },
   });
 
+  // React.useEffect(() => {
+  //   const fetchMovieData = async () => {
+  //     if (formik.values.title) {
+  //       try {
+  //         const searchResults = await axios.post(
+  //           `https://www.omdbapi.com/?t=${formik.values.title}&apikey=9444fae1`
+  //         );
+  //         setMovieSuggestion(searchResults.data);
+  //         console.log(searchResults.data);
+  //       } catch (error) {
+  //         console.error("Error fetching movie data:", error);
+  //       }
+  //     }
+  //   };
+
+  //   const delayDebounceFn = setTimeout(() => {
+  //     fetchMovieData();
+  //   }, 1000);
+
+  //   return () => clearTimeout(delayDebounceFn);
+  // }, [formik.values.title]);
+
   const handleImageChange = (event: any) => {
     const file = event.target.files[0];
     setSelectedFile(file);
@@ -82,7 +107,7 @@ export default function CreateMovieForm() {
         justifyContent: "center",
         color: "white",
         padding: 8,
-        width: "100vw"
+        width: "100vw",
       }}
     >
       <Box sx={{ alignSelf: { xs: "center", md: "flex-start" } }}>
@@ -99,13 +124,13 @@ export default function CreateMovieForm() {
           paddingY: 2,
         }}
       >
-        <Grid2
+        <Grid
           container
           spacing={8}
           padding={{ xs: 2, md: 4 }}
           marginX={{ xs: 2, md: 16 }}
         >
-          <Grid2>
+          <Grid>
             <Box
               sx={{
                 backgroundColor: colors.input,
@@ -144,11 +169,11 @@ export default function CreateMovieForm() {
                 onChange={handleImageChange}
               />
             </Box>
-          </Grid2>
-          <Grid2 container>
+          </Grid>
+          <Grid container>
             <Box
               sx={{
-                display: "flex",  
+                display: "flex",
                 flexDirection: "column",
                 gap: 2,
                 flexGrow: 1,
@@ -203,12 +228,16 @@ export default function CreateMovieForm() {
                   sx={{ color: colors.white, fontWeight: "bold", paddingX: 6 }}
                   disabled={isLoading}
                 >
-                  {isLoading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
+                  {isLoading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Submit"
+                  )}
                 </Button>
               </Box>
             </Box>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </Box>
     </Box>
   );
