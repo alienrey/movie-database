@@ -11,22 +11,7 @@ declare module './declarations' {
 }
 
 export const postgresql = (app: Application) => {
-  let config: any = app.get('postgresql')
-  const ca = fs.readFileSync('./config/ap-southeast-1-bundle.pem').toString()
-  config = {
-    client: "pg",
-    connection: {
-      connectionString: process.env.DB_CONNECTION_STRING,
-      ssl: {
-        ca
-      }
-    },
-    pool: {
-      min: 14,
-      max: 22,
-    },
-  };
+  const config = app.get('postgresql')
   const db = knex(config!)
-
   app.set('postgresqlClient', db)
 }
