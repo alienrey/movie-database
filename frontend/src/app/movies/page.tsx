@@ -14,6 +14,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMovies } from "@/providers/MoviesProvider";
 import Grid from "@mui/material/Grid2";
+import IconButton from "@mui/material/IconButton";
+import AddIcon from "@mui/icons-material/Add";
+
 export default function MoviesPage() {
   const { logout } = useAuth();
   const { fetchMovies, movies, page, setPage, limit, total } = useMovies();
@@ -65,107 +68,133 @@ export default function MoviesPage() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        color: "#fff",
-        position: "relative",
-        padding: 2,
+        height: "100vh",
       }}
     >
       <Box
         sx={{
           display: "flex",
-          justifyContent: "center",
-          mb: 2,
-          padding: { xs: 2, md: 2 },
-          width: "70%",
+          justifyContent: "space-between",
+          paddingX: 8,
+          paddingY: 2,
         }}
       >
-        <Grid
-          container
-          spacing={{ xs: 2, md: 8 }}
-          columns={{ xs: 4, sm: 8, md: 12 }}
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+            {movies.length > 0 && (
+            <>
+              <Typography
+              variant="h4"
+              sx={{
+                color: colors.white,
+                fontWeight: "bold",
+                marginRight: 2,
+              }}
+              >
+              My Movies
+              </Typography>
+              <IconButton
+              onClick={handleAddMovie}
+              sx={{
+                backgroundColor: 'transparent',
+                borderColor: colors.white,
+                color: colors.white,
+                borderRadius: "50%",
+                border: `2px solid ${colors.white}`,
+                width: "1.5rem",
+                height: "1.5rem",
+                "&:hover": {
+                backgroundColor: colors.input,
+                },
+              }}
+              >
+              <AddIcon />
+              </IconButton>
+            </>
+            )}
+        </Box>
+        <Button
+          onClick={logout}
+          endIcon={<LogoutIcon />}
+          sx={{
+            color: colors.white,
+            fontWeight: "bold",
+            fontSize: "1rem",
+            "&:hover": {
+              color: colors.fontColor,
+            },
+          }}
         >
-          {movies.map((movie, index) => (
-            <Grid size={3} key={index}>
-              <Box>
+          Logout
+        </Button>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          color: "#fff",
+          position: "relative",
+        }}
+      >
+        <Grid container spacing={2} width="50%">
+          {movies.map((movie) => (
+            <Grid
+              key={movie.id}
+              size={{
+                xs: 6,
+                md: 3,
+              }}
+              sx={{ justifyContent: "center" }}
+            >
                 <Card
-                  sx={{
-                    backgroundColor: "#18344a",
-                    color: "white",
-                    height: "100%",
-                    width: "100%",
-                  }}
+                onClick={() => router.push(`/movies/update/${movie.id}`)}
+                sx={{
+                  backgroundColor: colors.card,
+                  maxWidth: 150,
+                  maxHeight: 260,
+                  padding: 1,
+                  borderRadius: 2,
+                  "&:hover": {
+                  backgroundColor: colors.input,
+                  cursor: "pointer",
+                  },
+                }}
                 >
-                  <CardMedia
-                    sx={{
-                      height: { xs: 80, md: 120 },
-                      width: { xs: 60, md: 100 },
-                      objectFit: "cover",
-                    }}
-                    component="img"
-                    image={movie.poster}
-                    alt={movie.title}
-                  />
-                  <CardContent>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {movie.title}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {movie.year}
-                    </Typography>
-                  </CardContent>
+                <CardMedia
+                  component="img"
+                  height="180"
+                  image={movie.poster}
+                  alt={movie.title}
+                  sx={{ objectFit: "cover", borderRadius: 1 }}
+                />
+                <CardContent sx={{ padding: 1 }}>
+                  <Typography gutterBottom variant="body2" noWrap>
+                  {movie.title}
+                  </Typography>
+                  <Typography variant="caption">{movie.year}</Typography>
+                </CardContent>
                 </Card>
-              </Box>
             </Grid>
           ))}
         </Grid>
-      </Box>
-
-      <Button
-        onClick={logout}
-        endIcon={<LogoutIcon />}
-        sx={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          color: colors.white,
-          fontWeight: "bold",
-          fontSize: "0.7rem",
-          "&:hover": {
-            color: colors.fontColor,
-          },
-        }}
-      >
-        Logout
-      </Button>
-
-      {isLoading ? (
-        <></>
-      ) : (
-        movies.length === 0 && (
-          <>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
+        {isLoading ? (
+          <></>
+        ) : (
+          movies.length === 0 && (
+            <Box
+              sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "80vh",
+              }}
+            >
+              <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
               Your movie list is empty
-            </Typography>
-            <Button
+              </Typography>
+              <Button
               onClick={handleAddMovie}
               variant="contained"
               sx={{
@@ -174,34 +203,60 @@ export default function MoviesPage() {
                 color: colors.white,
                 fontWeight: "bold",
                 "&:hover": {
-                  backgroundColor: colors.highlightedSuccess,
+                backgroundColor: colors.highlightedSuccess,
                 },
               }}
-            >
+              >
               Add a new movie
-            </Button>
-          </>
-        )
-      )}
-      {movies.length > 0 && (
-        <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-          <Button onClick={handlePreviousPage} disabled={page === 1}>
-            Previous
-          </Button>
-          {pageNumbers.map((pageNumber) => (
+              </Button>
+            </Box>
+          )
+        )}
+        {movies.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+              mt: 2,
+              position: "fixed",
+              bottom: 30,
+            }}
+          >
             <Button
-              key={pageNumber}
-              onClick={() => handlePageClick(pageNumber)}
-              variant={page === pageNumber ? "contained" : "outlined"}
+              variant="text"
+              onClick={handlePreviousPage}
+              sx={{ color: colors.white, borderColor: colors.white }}
             >
-              {pageNumber}
+              Prev
             </Button>
-          ))}
-          <Button onClick={handleNextPage} disabled={page * limit >= total}>
-            Next
-          </Button>
-        </Box>
-      )}
+            {pageNumbers.map((pageNumber) => (
+              <Button
+                key={pageNumber}
+                onClick={() => handlePageClick(pageNumber)}
+                variant={page === pageNumber ? "contained" : "outlined"}
+                sx={{
+                  color: colors.white,
+                  minWidth: "30px",
+                  padding: "4px 16px",
+                  backgroundColor:
+                    page === pageNumber ? colors.success : colors.card,
+                  borderColor: colors.card,
+                  fontWeight: "bold",
+                }}
+              >
+                {pageNumber}
+              </Button>
+            ))}
+            <Button
+              variant="text"
+              onClick={handleNextPage}
+              sx={{ color: colors.white, borderColor: colors.white }}
+            >
+              Next
+            </Button>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
