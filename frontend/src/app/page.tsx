@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/providers/AuthProvider";
 import { CircularProgress, Box } from '@mui/material';
+import { colors } from '@/providers/ThemeProvider';
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
@@ -18,7 +19,9 @@ export default function Home() {
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-      <CircularProgress />
+      <CircularProgress sx={{
+        color: colors.white
+      }} />
     </Box>
   );
 }

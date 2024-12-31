@@ -39,7 +39,7 @@ export default function RootLayout({
         <Box
           component="svg"
           width="100%"
-          viewBox="0 0 1400 90"
+          viewBox="0 0 1400 85"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           sx={{ position: 'absolute', bottom: 0, zIndex: -1 }}
