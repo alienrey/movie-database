@@ -18,7 +18,7 @@ export const postgresql = (app: Application) => {
     connection: {
       connectionString: process.env.DB_CONNECTION_STRING,
       ssl: {
-        ca: fs.readFileSync('./config/ap-southeast-1-bundle.pem').toString()
+        ca
       }
     },
     pool: {
