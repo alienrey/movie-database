@@ -36,3 +36,4 @@
     "typescript": "^5"
   }
 }
+xclip -sel clip < ~/.ssh/id_rsa.pub
