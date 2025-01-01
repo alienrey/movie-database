@@ -43,9 +43,9 @@
     "test": "cross-env NODE_ENV=test npm run migrate && npm run mocha",
     "bundle:client": "npm run compile && npm pack --pack-destination ./public",
     "migrate": "PGSSLMODE=no-verify knex migrate:latest",
-    "migrate:down": "knex migrate:down",
-    "migrate:up": "knex migrate:up",
-    "migrate:make": "knex migrate:make"
+    "migrate:down": "PGSSLMODE=no-verify knex migrate:down",
+    "migrate:up": "PGSSLMODE=no-verify knex migrate:up",
+    "migrate:make": "PGSSLMODE=no-verify knex migrate:make"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.717.0",
