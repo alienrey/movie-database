@@ -30,7 +30,6 @@ export default function SignInPage() {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
 
   useEffect(() => {
-    console.log(isAuthenticated);
     if (isAuthenticated) {
       router.push("/");
     }
