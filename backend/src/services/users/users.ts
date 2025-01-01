@@ -47,7 +47,7 @@ export const user = (app: Application) => {
       find: [],
       get: [],
       create: [schemaHooks.validateData(userDataValidator), schemaHooks.resolveData(userDataResolver), async (context: HookContext) => {
-        if(context.data.signUpCode !== '1234') {
+        if(context.data.signUpCode !== process.env.SIGN_UP_CODE) {
           throw new Error('Invalid sign up code')
         }
         delete context.data.signUpCode
