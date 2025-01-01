@@ -7,7 +7,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import client from "@/utils/FeathersClient";
 import { dynamicStorage } from "@/utils/DynamicStorage";
 
@@ -22,33 +22,51 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string, rememberMe: boolean) => void;
   logout: () => void;
+  createAccount: (email: string, password: string, name: string, signUpCode: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const trimInputs = (...inputs: string[]) => inputs.map(input => input.trim());
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const router = useRouter();
+  const path = usePathname(); 
   const [user, setUser] = useState<User | null>(null);
 
-const login = async (
-  email: string,
-  password: string,
-  rememberMe: boolean
-) => {
+  const login = async (
+    email: string,
+    password: string,
+    rememberMe: boolean
+  ) => {
+    [email, password] = trimInputs(email, password);
 
-  if(rememberMe) {
-    dynamicStorage.setRememberMe(true);
-  } else {
-    dynamicStorage.setRememberMe(false);
-  }
+    if(rememberMe) {
+      dynamicStorage.setRememberMe(true);
+    } else {
+      dynamicStorage.setRememberMe(false);
+    }
 
-  const result = await Authentication.login(email, password);
-  setUser(result.user);
+    const result = await Authentication.login(email, password);
+    setUser(result.user);
 
-  router.push("/");
-};
+    router.push("/");
+  };
+
+  const createAccount = async (
+    email: string,
+    password: string,
+    name: string,
+    signUpCode: string
+  ) => {
+    [email, password, name, signUpCode] = trimInputs(email, password, name, signUpCode);
+
+    const result = await client.service('users').create({ email, password, name, signUpCode });
+    setUser(result);
+    router.push("/");
+  };
 
   const logout = async () => {
     await Authentication.logout();
@@ -64,10 +82,10 @@ const login = async (
   useEffect(() => {
     const reauthenticate = async () => {
       const token = dynamicStorage.getItem("feathers-jwt");
-      console.log(token);
-
       if (!token) {
-        router.push("/auth/signin");
+        if(path !== "/auth/signin" && path !== "/auth/signup") {
+          router.push("/auth/signin");
+        }
       } else {
         try {
           const { user } = await client.reAuthenticate();
@@ -83,7 +101,7 @@ const login = async (
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: getAuthStatus(), login, logout }}
+      value={{ user, isAuthenticated: getAuthStatus(), login, logout, createAccount }}
     >
       {children}
     </AuthContext.Provider>

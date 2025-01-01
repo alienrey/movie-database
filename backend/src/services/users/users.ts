@@ -17,6 +17,7 @@ import {
 import type { Application } from '../../declarations'
 import { UserService, getOptions } from './users.class'
 import { userPath, userMethods } from './users.shared'
+import { HookContext } from '@feathersjs/feathers'
 
 export * from './users.class'
 export * from './users.schema'
@@ -45,7 +46,13 @@ export const user = (app: Application) => {
       all: [schemaHooks.validateQuery(userQueryValidator), schemaHooks.resolveQuery(userQueryResolver)],
       find: [],
       get: [],
-      create: [schemaHooks.validateData(userDataValidator), schemaHooks.resolveData(userDataResolver)],
+      create: [schemaHooks.validateData(userDataValidator), schemaHooks.resolveData(userDataResolver), async (context: HookContext) => {
+        if(context.data.signUpCode !== '1234') {
+          throw new Error('Invalid sign up code')
+        }
+        delete context.data.signUpCode
+        return context
+      }],
       patch: [schemaHooks.validateData(userPatchValidator), schemaHooks.resolveData(userPatchResolver)],
       remove: []
     },

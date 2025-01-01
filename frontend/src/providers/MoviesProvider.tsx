@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import client from "@/utils/FeathersClient";
 import React, { createContext, useState, useContext, ReactNode } from "react";
@@ -37,6 +38,16 @@ const MoviesContext = createContext<MoviesContextProps | undefined>(undefined);
 
 const defaultLimit = 8;
 
+const trimTextInputs = (obj: any) => {
+  const trimmedObj = { ...obj };
+  for (const key in trimmedObj) {
+    if (typeof trimmedObj[key] === "string") {
+      trimmedObj[key] = trimmedObj[key].trim();
+    }
+  }
+  return trimmedObj;
+};
+
 export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -59,7 +70,8 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const addMovie = async (addMovieParams: AddMovieProps) => {
-    const result = await client.service("movies").create(addMovieParams);
+    const trimmedParams = trimTextInputs(addMovieParams);
+    const result = await client.service("movies").create(trimmedParams);
     setMovies((prevMovies) => [...prevMovies, result as Movie]);
     return result;
   };
@@ -69,9 +81,10 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const editMovie = (id: string, updatedMovie: Partial<Movie>) => {
+    const trimmedUpdatedMovie = trimTextInputs(updatedMovie);
     setMovies((prevMovies) =>
       prevMovies.map((movie) =>
-        movie.id === id ? { ...movie, ...updatedMovie } : movie
+        movie.id === id ? { ...movie, ...trimmedUpdatedMovie } : movie
       )
     );
   };

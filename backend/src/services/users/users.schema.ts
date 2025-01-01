@@ -29,7 +29,7 @@ export const userExternalResolver = resolve<User, HookContext<UserService>>({
 
 // Schema for creating new entries
 export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'name'], {
-  $id: 'UserData'
+  $id: 'UserData', additionalProperties: true
 })
 export type UserData = Static<typeof userDataSchema>
 export const userDataValidator = getValidator(userDataSchema, dataValidator)
