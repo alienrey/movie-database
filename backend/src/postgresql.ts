@@ -24,8 +24,6 @@ export const postgresql = (app: Application) => {
       ssl: ca ? { ca } : false,
     },
   }
-
-  console.log(config)
   const db = knex(config!)
   app.set('postgresqlClient', db)
 }
