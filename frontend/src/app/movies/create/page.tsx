@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -16,6 +16,7 @@ import { useMovies } from "@/providers/MoviesProvider";
 import { CircularProgress } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import showToast from "@/utils/Toasts";
+import axios from "axios";
 
 const validationSchema = yup.object({
   title: yup.string().required("Title is required"),
@@ -30,8 +31,6 @@ export default function CreateMovieForm() {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  // TODO: Implement movie suggestion
-  // const [movieSuggestion, setMovieSuggestion] = useState<any>(null);
   const { addMovie } = useMovies();
 
   const formik = useFormik({
@@ -71,27 +70,29 @@ export default function CreateMovieForm() {
     },
   });
 
-  // React.useEffect(() => {
-  //   const fetchMovieData = async () => {
-  //     if (formik.values.title) {
-  //       try {
-  //         const searchResults = await axios.post(
-  //           `https://www.omdbapi.com/?t=${formik.values.title}&apikey=9444fae1`
-  //         );
-  //         setMovieSuggestion(searchResults.data);
-  //         console.log(searchResults.data);
-  //       } catch (error) {
-  //         console.error("Error fetching movie data:", error);
-  //       }
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchMovieData = async () => {
+      if (formik.values.title) {
+        try {
+          const searchResults = await axios.post(
+            `https://www.omdbapi.com/?t=${formik.values.title}&apikey=9444fae1`
+          );
+          if(!searchResults.data.Error) {
+            formik.setFieldValue("year", searchResults.data.Year);
+          }
+          console.log(searchResults.data);
+        } catch (error) {
+          console.error("Error fetching movie data:", error);
+        }
+      }
+    };
 
-  //   const delayDebounceFn = setTimeout(() => {
-  //     fetchMovieData();
-  //   }, 1000);
+    const delayDebounceFn = setTimeout(() => {
+      fetchMovieData();
+    }, 500);
 
-  //   return () => clearTimeout(delayDebounceFn);
-  // }, [formik.values.title]);
+    return () => clearTimeout(delayDebounceFn);
+  }, [formik.values.title]);
 
   const handleImageChange = (event: any) => {
     const file = event.target.files[0];

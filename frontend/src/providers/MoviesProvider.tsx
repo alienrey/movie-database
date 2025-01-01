@@ -103,7 +103,8 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
     return result;
   };
 
-  const removeMovie = (id: string) => {
+  const removeMovie = async (id: string) => {
+    await client.service("movies").remove(id);
     setMovies((prevMovies) => prevMovies.filter((movie) => movie.id !== id));
   };
 

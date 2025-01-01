@@ -11,8 +11,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { Movie, useMovies } from "@/providers/MoviesProvider";
-import { CircularProgress, Grid2 } from "@mui/material";
+import { CircularProgress, Grid2, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton } from "@mui/material";
 import showToast from "@/utils/Toasts";
+import { Delete } from "@mui/icons-material";
 
 const validationSchema = yup.object({
   title: yup.string().required("Title is required"),
@@ -30,8 +31,9 @@ export default function UpdateMovieForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const { editMovie, getMovieById } = useMovies();
+  const { editMovie, getMovieById, removeMovie } = useMovies();
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const selectMovie = async () => {
@@ -88,6 +90,29 @@ export default function UpdateMovieForm() {
     setSelectedFile(file);
   };
 
+  const handleDelete = async () => {
+    try {
+      setIsLoading(true);
+      await removeMovie(slug as string);
+      showToast.success("Movie deleted successfully");
+      router.push("/movies");
+    } catch (error) {
+      console.log(error);
+      showToast.error("Failed to delete movie");
+    } finally {
+      setIsLoading(false);
+      setOpen(false);
+    }
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   if (isFetching) {
     return (
       <Box
@@ -115,10 +140,13 @@ export default function UpdateMovieForm() {
         width: "100vw",
       }}
     >
-      <Box sx={{ alignSelf: { xs: "center", md: "flex-start" } }}>
+      <Box sx={{ alignSelf: { xs: "center", md: "flex-start" }, display: "flex", justifyContent: "space-between", width: "100%" }}>
         <Typography variant="h4" gutterBottom align="left" fontWeight="bolder">
           Edit movie
         </Typography>
+        <IconButton onClick={handleClickOpen} sx={{ color: colors.error }}>
+          <Delete />
+        </IconButton>
       </Box>
       <Box
         component="form"
@@ -246,6 +274,29 @@ export default function UpdateMovieForm() {
           </Grid2>
         </Grid2>
       </Box>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+      >
+        <DialogTitle sx={{
+          color: colors.error,
+          fontWeight: "bold",
+          fontSize: "1.5rem",
+        }}>{"Delete Movie"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this movie? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleDelete} color="error" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
