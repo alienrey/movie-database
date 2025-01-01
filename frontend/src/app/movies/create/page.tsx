@@ -17,6 +17,8 @@ import { CircularProgress } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import showToast from "@/utils/Toasts";
 import axios from "axios";
+import { compressImage } from "@/utils/ImageCompression";
+import { toast } from "react-toastify";
 
 const validationSchema = yup.object({
   title: yup.string().required("Title is required"),
@@ -30,6 +32,7 @@ const validationSchema = yup.object({
 export default function CreateMovieForm() {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { addMovie } = useMovies();
 
@@ -46,17 +49,26 @@ export default function CreateMovieForm() {
           showToast.info("Please select an image");
           return;
         }
+        setIsCompressing(true);
+        const compressedFile = await compressImage(selectedFile);
+        setIsCompressing(false);
+        if (!compressedFile) {
+          showToast.error("Failed to compress image");
+          return;
+        }
+
         const fileMetaData = {
-          name: selectedFile.name,
-          type: selectedFile.type,
-          size: selectedFile.size,
+          name: compressedFile.name,
+          type: compressedFile.type,
+          size: compressedFile.size,
         };
         await addMovie({
           title: values.title,
           year: Number(values.year),
-          file: selectedFile,
+          file: compressedFile,
           fileMetaData,
         });
+
         showToast.success("Movie added successfully");
         setSelectedFile(null);
         formik.resetForm();
@@ -66,9 +78,19 @@ export default function CreateMovieForm() {
         showToast.error("Failed to add movie");
       } finally {
         setIsLoading(false);
+        setIsCompressing(false);
       }
     },
   });
+
+
+  useEffect(() => {
+    if (isCompressing) {
+      toast.loading("Compressing image...");
+    } else {
+      toast.dismiss();
+    }
+  }, [isCompressing]);
 
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -94,9 +116,18 @@ export default function CreateMovieForm() {
     return () => clearTimeout(delayDebounceFn);
   }, [formik.values.title]);
 
-  const handleImageChange = (event: any) => {
+  const handleImageChange = async (event: any) => {
+    const MAX_FILE_SIZE = 1000 * 1024;
     const file = event.target.files[0];
-    setSelectedFile(file);
+    if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        showToast.error("File size exceeds 1MB");
+        event.target.value = ""; // Clear the input value
+      } else {
+        console.log("File accepted:", file);
+          setSelectedFile(file);
+      }
+    }
   };
 
   return (
@@ -158,7 +189,7 @@ export default function CreateMovieForm() {
                 <>
                   <CloudUploadIcon sx={{ fontSize: 40, color: "#bdbdbd" }} />
                   <Typography variant="body2" color="#bdbdbd">
-                    Drop an image here
+                    Drop an image here (Must not exceed 1Mb)
                   </Typography>
                 </>
               )}

@@ -14,6 +14,8 @@ import { Movie, useMovies } from "@/providers/MoviesProvider";
 import { CircularProgress, Grid2, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton } from "@mui/material";
 import showToast from "@/utils/Toasts";
 import { Delete } from "@mui/icons-material";
+import { compressImage } from "@/utils/ImageCompression";
+import { toast } from "react-toastify";
 
 const validationSchema = yup.object({
   title: yup.string().required("Title is required"),
@@ -33,6 +35,7 @@ export default function UpdateMovieForm() {
   const [isFetching, setIsFetching] = useState(true);
   const { editMovie, getMovieById, removeMovie } = useMovies();
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -60,7 +63,15 @@ export default function UpdateMovieForm() {
           title: values.title,
           year: Number(values.year),
         };
+
         if (selectedFile) {
+          setIsCompressing(true);
+          const compressedFile = await compressImage(selectedFile);
+          setIsCompressing(false);
+          if (!compressedFile) {
+            showToast.error("Failed to compress image");
+            return;
+          }
           movieData.file = selectedFile;
           movieData.fileMetaData = {
             name: selectedFile.name,
@@ -113,6 +124,14 @@ export default function UpdateMovieForm() {
     setOpen(false);
   };
 
+  useEffect(() => {
+    if (isCompressing) {
+      toast.loading("Compressing image...");
+    } else {
+      toast.dismiss();
+    }
+  }, [isCompressing]);
+
   if (isFetching) {
     return (
       <Box
@@ -127,7 +146,6 @@ export default function UpdateMovieForm() {
       </Box>
     );
   }
-
   return (
     <Box
       sx={{
