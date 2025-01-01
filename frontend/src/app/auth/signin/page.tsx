@@ -144,6 +144,35 @@ export default function SignInPage() {
               </Typography>
             )}
           </Button>
+            <Button
+            fullWidth
+            variant="text"
+            onClick={() => router.push('/auth/signup')}
+            >
+            <Typography
+              sx={{
+              mt: 1,
+              color: `${colors.white}`,
+              fontSize: "10px",
+              fontWeight: 200,
+              }}
+            >
+              Don&apos;t have an account?{" "}
+              <Typography
+              component="span"
+              sx={{
+                color: `${colors.white}`,
+                fontSize: "10px",
+                fontWeight: 200,
+                "&:hover": {
+                color: `${colors.highlightedSuccess}`,
+                },
+              }}
+              >
+              Sign up
+              </Typography>
+            </Typography>
+            </Button>
         </form>
       </Box>
     </Box>
