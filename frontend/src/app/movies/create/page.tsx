@@ -106,7 +106,7 @@ export default function CreateMovieForm() {
         alignItems: { xs: "center", md: "left" },
         justifyContent: "center",
         color: "white",
-        padding: 8,
+        padding: 4,
         width: "100vw",
       }}
     >
