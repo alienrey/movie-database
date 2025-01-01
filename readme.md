@@ -16,7 +16,7 @@ This documentation will guide you through the setup of the Movie Database applic
 
 In production, the following are used:
 - **Object Storage**: AWS S3
-- **App Hosting**: AWS EC2 (t2.small Ubuntu) with PM2 process manager
+- **App Hosting**: AWS EC2 (t3.small Ubuntu) with PM2 process manager
 - **Routing**: Cloudflare Tunnels
 - **Database**: Digital Ocean PostgreSQL
 
