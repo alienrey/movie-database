@@ -1,22 +1,30 @@
 ## Movie Database App
 
-Go to the [Movie Database App](https://movie.alanrayelangos.cloud/)
+Go to the [Movie Database App](https://movie.alanrayelangos.cloud/).
+
+**Note**: When creating an account, you need a "sign-up code." This is an extra layer of protection, as the movie data is designed to be accessible to all users by default.
+
+```SIGN_UP_CODE=youarebreathtaking!!!```
+
+When adding movies, the "publishing year" field will be auto-populated with the year based on the result from the OMDB API as you type in the title.
+
+Images are compressed before uploading to reduce file size. A file size limit is also enforced.
 
 # Setup
 
 This documentation will guide you through the setup of the Movie Database application. The server uses FeathersJS 5, the frontend is built with Next.js, and the database is PostgreSQL.
 
-In production, the following technologies are used:
+In production, the following are used:
 - **Object Storage**: AWS S3
-- **App Hosting**: AWS EC2 Ubuntu with PM2 process manager
+- **App Hosting**: AWS EC2 (t2.small Ubuntu) with PM2 process manager
 - **Routing**: Cloudflare Tunnels
+- **Database**: Digital Ocean PostgreSQL
 
 ## Prerequisites
 
 Ensure you have the following installed on your machine:
 - Node.js (v22.12.0 or higher)
 - npm or yarn
-- PostgreSQL
 
 ## Backend Setup (FeathersJS 5)
 
@@ -51,9 +59,9 @@ Ensure you have the following installed on your machine:
     DB_NAME=your_db_name
     DB_CA="your_db_ca_certificate"
 
-    PORT=3030
-    HOSTNAME=localhost
     FEATHERS_SECRET=your_secret_key
+
+    PORT=3030
     PUBLIC=./public/
     ORIGINS=http://localhost:3030
     AUTH_ENTITY=user
@@ -65,6 +73,8 @@ Ensure you have the following installed on your machine:
     JWT_EXPIRES_IN=1d
     LOCAL_USERNAME_FIELD=email
     LOCAL_PASSWORD_FIELD=password
+
+    SIGN_UP_CODE=your_sign_up_secret
     ```
 
 5. Start the development backend server:
@@ -81,12 +91,12 @@ Ensure you have the following installed on your machine:
 
 2. Install dependencies:
     ```sh
-    yarn install
+    yarn
     ```
 
 3. Configure the environment variables by creating a `.env.local` file in the `/frontend` directory:
     ```sh
-    touch .env.local
+    touch .env
     ```
 
 4. Add the following environment variables to the `.env.local` file:
