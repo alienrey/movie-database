@@ -2,7 +2,7 @@
 
 Go to the [Movie Database App](https://movie.alanrayelangos.cloud/).
 
-**Note**: When creating an account, you need a "sign-up code." This is an extra layer of protection, as the movie data is designed to be accessible to all users by default.
+**Note**: When creating an account, you need a "sign-up code."
 
 ```SIGN_UP_CODE=youarebreathtaking!!!```
 
