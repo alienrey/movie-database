@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -26,14 +26,8 @@ const validationSchema = Yup.object({
 export default function SignInPage() {
   const router = useRouter();
 
-  const { login, isAuthenticated } = useAuth();
+  const { login } = useAuth();
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/");
-    }
-  }, [isAuthenticated, router]);
 
   const formik = useFormik({
     initialValues: {
