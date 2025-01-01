@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import client from "@/utils/FeathersClient";
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 
-interface Movie {
+export interface Movie {
   id: string;
   title: string;
   year: number;
   poster: string;
 }
 
-interface AddMovieProps {
+export interface AddMovieProps {
   title: string;
   year: number;
   file: File;
@@ -21,17 +21,34 @@ interface AddMovieProps {
   };
 }
 
+export interface UpdatedMovieParams {
+  id: string;
+  data: {
+    title: string;
+    year: number;
+    file?: File;
+    fileMetaData?: {
+      name: string;
+      type: string;
+      size: number;
+    };
+  }
+}
+
+
 interface MoviesContextProps {
   movies: Movie[];
   page: number;
   limit: number;
   total: number;
+  isLoading: boolean;
   fetchMovies: (page?: number, limit?: number) => void;
   addMovie: (movieParams: AddMovieProps) => void;
   removeMovie: (id: string) => void;
-  editMovie: (id: string, updatedMovie: Partial<Movie>) => void;
+  editMovie: (params: UpdatedMovieParams) => void;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
+  getMovieById: (id: string) => Promise<Movie>;
 }
 
 const MoviesContext = createContext<MoviesContextProps | undefined>(undefined);
@@ -55,18 +72,28 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(defaultLimit);
   const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchMovies = async (page = 1) => {
-    const response = await client.service('movies').find({
-      query: {
-        $limit: limit,
-        $skip: (page - 1) * limit,
-      },
-    });
-    setMovies(response.data as Movie[]);
-    setTotal(response.total);
-    setPage(page);
-    console.log(response);
+    try {
+      setIsLoading(true);
+      const response = await client.service('movies').find({
+        query: {
+          $limit: limit,
+          $skip: (page - 1) * limit,
+          $sort: {
+            title: 1,
+          },
+        },
+      });
+      setMovies(response.data as Movie[]);
+      setTotal(response.total);
+      setPage(page);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const addMovie = async (addMovieParams: AddMovieProps) => {
@@ -80,14 +107,28 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
     setMovies((prevMovies) => prevMovies.filter((movie) => movie.id !== id));
   };
 
-  const editMovie = (id: string, updatedMovie: Partial<Movie>) => {
-    const trimmedUpdatedMovie = trimTextInputs(updatedMovie);
+  const editMovie = async (params: UpdatedMovieParams) => {
+    if (!params.id) return;
+    const updatedMovie = await client.service("movies").patch(params.id, {
+      ...params.data,
+    });
+
     setMovies((prevMovies) =>
       prevMovies.map((movie) =>
-        movie.id === id ? { ...movie, ...trimmedUpdatedMovie } : movie
+        movie.id === params.id
+          ? { ...movie, ...updatedMovie }
+          : movie
       )
     );
   };
+
+  const getMovieById = async (id: string) => {
+    return await client.service("movies").get(id) as Movie;
+  }
+
+  useEffect(() => {
+    if(movies.length === 0) fetchMovies();
+  }, []);
 
   return (
     <MoviesContext.Provider
@@ -96,12 +137,14 @@ export const MoviesProvider: React.FC<{ children: ReactNode }> = ({
         page,
         limit,
         total,
+        isLoading,
         fetchMovies,
         addMovie,
         removeMovie,
         setPage,
         setLimit,
         editMovie,
+        getMovieById,
       }}
     >
       {children}

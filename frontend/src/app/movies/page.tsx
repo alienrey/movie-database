@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   CardMedia,
+  CircularProgress,
   Typography,
 } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -179,7 +180,17 @@ export default function MoviesPage() {
           ))}
         </Grid>
         {isLoading ? (
-          <></>
+            <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "80vh",
+              color: colors.white,
+            }}
+            >
+              <CircularProgress sx={{ color: colors.white }} />
+            </Box>
         ) : (
           movies.length === 0 && (
             <Box

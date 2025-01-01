@@ -1,18 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Image from "next/image";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { colors } from "@/providers/ThemeProvider";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useMovies } from "@/providers/MoviesProvider";
+import { Movie, useMovies } from "@/providers/MoviesProvider";
 import { CircularProgress, Grid2 } from "@mui/material";
 import showToast from "@/utils/Toasts";
 
@@ -26,42 +24,59 @@ const validationSchema = yup.object({
 });
 
 export default function UpdateMovieForm() {
+  const { slug } = useParams();
+
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { addMovie } = useMovies();
+  const [isFetching, setIsFetching] = useState(true);
+  const { editMovie, getMovieById } = useMovies();
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+
+  useEffect(() => {
+    const selectMovie = async () => {
+      const movie = await getMovieById(slug as string);
+      if (movie) {
+        setSelectedMovie(movie);
+      }
+      setIsFetching(false);
+    };
+    selectMovie();
+  }, [slug]);
 
   const formik = useFormik({
     initialValues: {
-      title: "",
-      year: "",
+      title: selectedMovie?.title || "",
+      year: selectedMovie?.year || "",
     },
+    enableReinitialize: true,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
         setIsLoading(true);
-        if (!selectedFile) {
-          showToast.info("Please select an image");
-          return;
-        }
-        const fileMetaData = {
-          name: selectedFile.name,
-          type: selectedFile.type,
-          size: selectedFile.size,
-        };
-        await addMovie({
+        const movieData: any = {
           title: values.title,
           year: Number(values.year),
-          file: selectedFile,
-          fileMetaData,
+        };
+        if (selectedFile) {
+          movieData.file = selectedFile;
+          movieData.fileMetaData = {
+            name: selectedFile.name,
+            type: selectedFile.type,
+            size: selectedFile.size,
+          };
+        }
+        await editMovie({
+          id: slug as string,
+          data: movieData,
         });
-        showToast.success("Movie added successfully");
+        showToast.success("Movie updated successfully");
         setSelectedFile(null);
         formik.resetForm();
         router.back();
       } catch (error) {
         console.log(error);
-        showToast.error("Failed to add movie");
+        showToast.error("Failed to update movie");
       } finally {
         setIsLoading(false);
       }
@@ -73,6 +88,21 @@ export default function UpdateMovieForm() {
     setSelectedFile(file);
   };
 
+  if (isFetching) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -82,7 +112,7 @@ export default function UpdateMovieForm() {
         justifyContent: "center",
         color: "white",
         padding: 4,
-        width: "100vw"
+        width: "100vw",
       }}
     >
       <Box sx={{ alignSelf: { xs: "center", md: "flex-start" } }}>
@@ -129,12 +159,14 @@ export default function UpdateMovieForm() {
                   objectFit="contain"
                 />
               ) : (
-                <>
-                  <CloudUploadIcon sx={{ fontSize: 40, color: "#bdbdbd" }} />
-                  <Typography variant="body2" color="#bdbdbd">
-                    Drop an image here
-                  </Typography>
-                </>
+                selectedMovie?.poster && (
+                  <Image
+                    src={selectedMovie.poster}
+                    alt="Uploaded"
+                    layout="fill"
+                    objectFit="contain"
+                  />
+                )
               )}
               <input
                 hidden
@@ -148,7 +180,7 @@ export default function UpdateMovieForm() {
           <Grid2 container>
             <Box
               sx={{
-                display: "flex",  
+                display: "flex",
                 flexDirection: "column",
                 gap: 2,
                 flexGrow: 1,
@@ -203,7 +235,11 @@ export default function UpdateMovieForm() {
                   sx={{ color: colors.white, fontWeight: "bold", paddingX: 6 }}
                   disabled={isLoading}
                 >
-                  {isLoading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
+                  {isLoading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Update"
+                  )}
                 </Button>
               </Box>
             </Box>

@@ -3,6 +3,9 @@ import { authenticate } from '@feathersjs/authentication'
 
 import { hooks as schemaHooks } from '@feathersjs/schema'
 
+import crypto from 'crypto'
+
+
 import {
   moviesDataValidator,
   moviesPatchValidator,
@@ -17,6 +20,10 @@ import {
 import type { Application } from '../../declarations'
 import { MoviesService, getOptions } from './movies.class'
 import { moviesPath, moviesMethods } from './movies.shared'
+import { HookContext } from '@feathersjs/feathers'
+import { s3, bucketName, bucketEndpoint } from './utils/s3'
+import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
+import { title } from 'process'
 
 export * from './movies.class'
 export * from './movies.schema'
@@ -44,7 +51,36 @@ export const movies = (app: Application) => {
       find: [],
       get: [],
       create: [schemaHooks.validateData(moviesDataValidator), schemaHooks.resolveData(moviesDataResolver)],
-      patch: [schemaHooks.validateData(moviesPatchValidator), schemaHooks.resolveData(moviesPatchResolver)],
+      patch: [schemaHooks.validateData(moviesPatchValidator), schemaHooks.resolveData(moviesPatchResolver), 
+        async (context: HookContext) => {
+          if(context.data.file) {
+            const { data } = context
+            
+            const previousData = await context.service.get(context.id)
+            const deleteParams = {
+              Bucket: bucketName as string,
+              Key: previousData.poster.split('/').pop()
+            }
+            const deleteCommand = new DeleteObjectCommand(deleteParams)
+            await s3.send(deleteCommand)
+
+            const uploadParams = {
+              Bucket: bucketName as string,
+              Key: `${crypto.randomBytes(32).toString('hex')}.${data.fileMetaData.name.split('.').pop()}`,
+              Body: data.file,
+              contentType: data.fileMetaData.type
+            }
+            const command = new PutObjectCommand(uploadParams)
+            await s3.send(command)
+            context.data = {
+              title: data.title,
+              year: data.year,
+              poster: `${bucketEndpoint}/${uploadParams.Key}`
+            }
+          }
+          return context
+        }
+      ],
       remove: []
     },
     after: {
