@@ -12,7 +12,7 @@ Images are compressed before uploading to reduce file size. A file size limit is
 
 # Setup
 
-This documentation will guide you through the setup of the Movie Database application. The server uses FeathersJS 5, the frontend is built with Next.js, and the database is PostgreSQL.
+This documentation will guide you through the setup of the Movie Database application. The server uses FeathersJS 5 (a powerful framework for creating REST APIs), the frontend is built with Next.js with MUI, and the database is PostgreSQL.
 
 In production, the following are used:
 - **Object Storage**: AWS S3
