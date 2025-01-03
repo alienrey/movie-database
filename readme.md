@@ -26,7 +26,7 @@ Ensure you have the following installed on your machine:
 - Node.js (v22.12.0 or higher)
 - npm or yarn
 
-## Backend Setup (FeathersJS 5)
+## Backend Setup (Express with FeathersJS 5)
 
 1. Navigate to the backend directory:
     ```sh
